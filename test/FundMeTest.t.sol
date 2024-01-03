@@ -94,6 +94,36 @@ contract FundMeTest is Test {
         );
     }
 
+    function testWithdrawFromMultipleFundersCheaper() public funded {
+        //Arrange set up
+        uint160 numberOfFunders = 10;
+        uint160 startingFunderIndex = 1;
+
+        for (uint160 i = startingFunderIndex; i < numberOfFunders; i++) {
+            // vm.prank new address
+            // vm.deal new address
+
+            // HOAX is a combination of vm.prank and vm.deal
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+            // fund the fundMe
+        }
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        // startPrank and stopPrank is liek saying start and stop broadcast
+        vm.startPrank(fundMe.getOwner());
+        fundMe.cheaperWithdraw();
+        vm.stopPrank();
+
+        //Assert
+        assert(address(fundMe).balance == 0);
+        assert(
+            startingFundMeBalance + startingOwnerBalance ==
+                fundMe.getOwner().balance
+        );
+    }
+
     function testWithdrawFromMultipleFunders() public funded {
         //Arrange set up
         uint160 numberOfFunders = 10;
